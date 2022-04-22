@@ -13,6 +13,6 @@ defmodule ChargebeeElixir.Customer do
   and email logs will not be moved. The API execution is asynchronous.
   """
   def merge(to_customer_id, from_customer_id) do
-    create([to_customer_id: to_customer_id, from_customer_id: from_customer_id], "/merge")
+    create(%{to_customer_id: to_customer_id, from_customer_id: from_customer_id}, "/merge")
   end
 end

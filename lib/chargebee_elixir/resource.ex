@@ -14,15 +14,32 @@ defmodule ChargebeeElixir.Resource do
       end
 
       def list(params \\ %{}) do
-        # Should pagination be by default?
-        case Interface.get(resource_base_path(), params) do
-          %{"list" => current_list, "next_offset" => next_offset} ->
-            Enum.map(current_list, &Map.get(&1, @resource)) ++
-              __MODULE__.list(Map.merge(params, %{"offset" => next_offset}))
+        params
+        |> stream_list()
+        |> Enum.to_list()
+      end
 
-          %{"list" => current_list} ->
-            Enum.map(current_list, &Map.get(&1, @resource))
-        end
+      def stream_list(params \\ %{}) do
+        Stream.unfold(0, fn
+          nil ->
+            nil
+
+          0 ->
+            response = Interface.get(resource_base_path(), params)
+
+            list = Map.get(response, "list")
+            next_offset = Map.get(response, "next_offset")
+
+            {list, next_offset}
+
+          offset ->
+            params = Map.merge(params, %{"offset" => offset})
+            response = Interface.get(resource_base_path(), params)
+
+            {Map.get(response, "list"), Map.get(response, "next_offset")}
+        end)
+        |> Stream.flat_map(& &1)
+        |> Stream.map(&Map.get(&1, @resource))
       end
 
       def create(params, path \\ "") do

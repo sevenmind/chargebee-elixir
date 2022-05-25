@@ -21,7 +21,7 @@ defmodule ChargebeeElixir.Interface do
       |> Enum.join("?")
 
     http_client().get!(url, headers())
-    |> handle_response()
+    |> handle_response(path, params)
   end
 
   def post(path, data) do
@@ -35,32 +35,32 @@ defmodule ChargebeeElixir.Interface do
       body,
       headers() ++ [{"Content-Type", "application/x-www-form-urlencoded"}]
     )
-    |> handle_response()
+    |> handle_response(path, data)
   end
 
-  defp handle_response(%{body: body, status_code: 200}) do
+  defp handle_response(%{body: body, status_code: 200}, _, _) do
     Jason.decode!(body)
   end
 
-  defp handle_response(%{body: body, status_code: 400}) do
+  defp handle_response(%{body: body, status_code: 400}, path, data) do
     message =
       body
       |> Jason.decode!()
       |> Map.get("message")
 
-    raise ChargebeeElixir.InvalidRequestError, message: message
+    raise ChargebeeElixir.InvalidRequestError, message: message, path: path, data: data
   end
 
-  defp handle_response(%{status_code: 401}) do
-    raise ChargebeeElixir.UnauthorizedError
+  defp handle_response(%{status_code: 401}, path, data) do
+    raise ChargebeeElixir.UnauthorizedError, path: path, data: data
   end
 
-  defp handle_response(%{status_code: 404}) do
-    raise ChargebeeElixir.NotFoundError
+  defp handle_response(%{status_code: 404}, path, data) do
+    raise ChargebeeElixir.NotFoundError, path: path, data: data
   end
 
-  defp handle_response(%{}) do
-    raise ChargebeeElixir.UnknownError
+  defp handle_response(%{}, path, data) do
+    raise ChargebeeElixir.UnknownError, path: path, data: data
   end
 
   defp http_client do

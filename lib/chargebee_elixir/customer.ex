@@ -4,7 +4,6 @@ defmodule ChargebeeElixir.Customer do
   """
   use ChargebeeElixir.Resource, "customer"
 
-
   @doc """
   Merge `from_customer_id` into `to_customer_id`
 

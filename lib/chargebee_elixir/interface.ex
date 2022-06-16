@@ -59,8 +59,12 @@ defmodule ChargebeeElixir.Interface do
     raise ChargebeeElixir.NotFoundError, path: path, data: data
   end
 
-  defp handle_response(%{}, path, data) do
-    raise ChargebeeElixir.UnknownError, path: path, data: data
+  defp handle_response(%{status_code: 429}, path, data) do
+    raise ChargebeeElixir.RateLimitError, path: path, data: data
+  end
+
+  defp handle_response(%{} = response, path, data) do
+    raise ChargebeeElixir.UnknownError, path: path, data: data, response: response
   end
 
   defp http_client do

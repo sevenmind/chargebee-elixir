@@ -1,8 +1,8 @@
-defmodule ChargebeeElixir.Gift do
+defmodule ExChargebee.Gift do
   @moduledoc """
   An interface for interacting with Chargebee Gifts
   """
-  use ChargebeeElixir.Resource, "gift"
+  use ExChargebee.Resource, "gift"
 
   def create_for_items(params) do
     create(params, "/create_for_items")

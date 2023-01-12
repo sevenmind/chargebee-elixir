@@ -1,14 +1,14 @@
-defmodule ChargebeeElixir.Event do
+defmodule ExChargebee.Event do
   @moduledoc """
   an interface for interacting with Events
   """
   @resource "event"
-  alias ChargebeeElixir.Interface
+  alias ExChargebee.Interface
 
   def retrieve(id) do
     id |> resource_path() |> Interface.get() |> Map.get(@resource)
   rescue
-    ChargebeeElixir.NotFoundError -> nil
+    ExChargebee.NotFoundError -> nil
   end
 
   def list(params \\ %{}) do

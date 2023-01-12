@@ -1,8 +1,8 @@
-defmodule ChargebeeElixir.Resource do
+defmodule ExChargebee.Resource do
   @moduledoc false
   defmacro __using__(resource) do
     quote location: :keep do
-      alias ChargebeeElixir.Interface
+      alias ExChargebee.Interface
 
       @resource unquote(resource)
       @resource_plural Inflex.pluralize(@resource)
@@ -10,7 +10,7 @@ defmodule ChargebeeElixir.Resource do
       def retrieve(id) do
         id |> resource_path() |> Interface.get() |> Map.get(@resource)
       rescue
-        ChargebeeElixir.NotFoundError -> nil
+        ExChargebee.NotFoundError -> nil
       end
 
       def list(params \\ %{}) do

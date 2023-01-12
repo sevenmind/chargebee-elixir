@@ -1,8 +1,8 @@
-defmodule ChargebeeElixir.Customer do
+defmodule ExChargebee.Customer do
   @moduledoc """
   an interface for interacting with Customers
   """
-  use ChargebeeElixir.Resource, "customer"
+  use ExChargebee.Resource, "customer"
 
   @doc """
   Merge `from_customer_id` into `to_customer_id`

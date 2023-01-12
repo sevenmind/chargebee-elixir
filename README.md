@@ -1,13 +1,16 @@
-# ChargebeeElixir
+# ExChargebee
 
 
 Elixir implementation of [Chargebee API](https://apidocs.chargebee.com/docs/api).
+
+ExChargebee is a fork of [ChargebeeElixir](https://github.com/NicolasMarlier/chargebee-elixir) by Nicolas Marlier
 
 ## v0.2.0
 This is a work in progress: right now, we only implement those methods:
 - list
 - retrieve
 - create
+- update
 
 on those resources:
 - addon
@@ -28,12 +31,12 @@ on those resources:
 - subscription
 
 ## Installation
-The package can be installed by adding `chargebee_elixir` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `ex_chargebee` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:chargebee_elixir, "~> 0.1.3"}
+    {:ex_chargebee, "~> 0.2.2"}
   ]
 end
 ```
@@ -41,7 +44,7 @@ end
 ## Configuration
 ```elixir
 # config/dev.ex
-config :chargebee_elixir,
+config :ex_chargebee,
   namespace: "$your_namespace",
   api_key: "$your_api_key"
 ```
@@ -49,15 +52,5 @@ config :chargebee_elixir,
 ## Usage
 ```elixir
 # e.g.
-ChargebeeElixir.Plan.list()
-```
-
-## Run tests
-```sh
-mix test
-```
-
-## Generate doc tests
-```sh
-sh generate_doc.sh
+ExChargebee.Plan.list()
 ```

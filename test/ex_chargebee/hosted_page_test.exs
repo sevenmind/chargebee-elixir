@@ -1,4 +1,4 @@
-defmodule ChargebeeElixir.HostedPageTest do
+defmodule ExChargebee.HostedPageTest do
   use ExUnit.Case
   import Mox
 
@@ -7,7 +7,7 @@ defmodule ChargebeeElixir.HostedPageTest do
   describe "checkout_new" do
     test "correct data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/hosted_pages/checkout_new"
@@ -27,7 +27,7 @@ defmodule ChargebeeElixir.HostedPageTest do
         end
       )
 
-      assert ChargebeeElixir.HostedPage.checkout_new(%{
+      assert ExChargebee.HostedPage.checkout_new(%{
                subscription: %{
                  plan_id: "plan-a"
                },
@@ -42,7 +42,7 @@ defmodule ChargebeeElixir.HostedPageTest do
   describe "checkout_existing" do
     test "correct data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url ==
@@ -63,7 +63,7 @@ defmodule ChargebeeElixir.HostedPageTest do
         end
       )
 
-      assert ChargebeeElixir.HostedPage.checkout_existing(%{
+      assert ExChargebee.HostedPage.checkout_existing(%{
                subscription: %{
                  id: "subscription-a",
                  plan_id: "plan-a"

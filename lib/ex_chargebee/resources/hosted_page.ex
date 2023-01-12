@@ -1,8 +1,8 @@
-defmodule ChargebeeElixir.HostedPage do
+defmodule ExChargebee.HostedPage do
   @moduledoc """
   an interface for interacting with HostedPages
   """
-  use ChargebeeElixir.Resource, "hosted_page"
+  use ExChargebee.Resource, "hosted_page"
 
   def checkout_new(params) do
     create(params, "/checkout_new")

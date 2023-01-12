@@ -1,4 +1,4 @@
-defmodule ChargebeeElixir.InterfaceTest do
+defmodule ExChargebee.InterfaceTest do
   use ExUnit.Case
 
   describe "serialize" do
@@ -35,7 +35,7 @@ defmodule ChargebeeElixir.InterfaceTest do
         "card[cvv]" => "007"
       }
 
-      assert ChargebeeElixir.Interface.serialize(input) == output
+      assert ExChargebee.Interface.serialize(input) == output
     end
 
     test "chargebeee example 2" do
@@ -76,18 +76,18 @@ defmodule ChargebeeElixir.InterfaceTest do
         "customer[first_name]" => "John"
       }
 
-      assert ChargebeeElixir.Interface.serialize(input) == output
+      assert ExChargebee.Interface.serialize(input) == output
     end
 
     test "simple list" do
-      assert ChargebeeElixir.Interface.serialize([
+      assert ExChargebee.Interface.serialize([
                %{id: "object-a"},
                %{id: "object-b"}
              ]) == %{"id[0]" => "object-a", "id[1]" => "object-b"}
     end
 
     test "deep nesting, no lists" do
-      assert ChargebeeElixir.Interface.serialize(%{
+      assert ExChargebee.Interface.serialize(%{
                addon: %{
                  id: "addon-a",
                  nested: %{
@@ -100,7 +100,7 @@ defmodule ChargebeeElixir.InterfaceTest do
     end
 
     test "simple nesting" do
-      assert ChargebeeElixir.Interface.serialize(%{
+      assert ExChargebee.Interface.serialize(%{
                addons: [
                  %{
                    id: "addon-a",
@@ -120,7 +120,7 @@ defmodule ChargebeeElixir.InterfaceTest do
     end
 
     test "Example of complex nested list field" do
-      assert ChargebeeElixir.Interface.serialize(%{
+      assert ExChargebee.Interface.serialize(%{
                item_constraints: [
                  %{
                    constraint: "specific",
@@ -151,7 +151,7 @@ defmodule ChargebeeElixir.InterfaceTest do
 
       assert as_encoded_params ==
                input
-               |> ChargebeeElixir.Interface.serialize()
+               |> ExChargebee.Interface.serialize()
                |> URI.encode_query()
                |> URI.decode()
     end
@@ -169,7 +169,7 @@ defmodule ChargebeeElixir.InterfaceTest do
         "plan_id" => "free"
       }
 
-      assert ChargebeeElixir.Interface.serialize(input) == output
+      assert ExChargebee.Interface.serialize(input) == output
     end
 
     test "serializes metadata as encoded json" do
@@ -177,7 +177,7 @@ defmodule ChargebeeElixir.InterfaceTest do
 
       output = %{"metadata" => ~S({"some":"value"})}
 
-      assert ChargebeeElixir.Interface.serialize(input) == output
+      assert ExChargebee.Interface.serialize(input) == output
     end
   end
 end

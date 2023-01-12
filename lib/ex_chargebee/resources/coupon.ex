@@ -1,8 +1,8 @@
-defmodule ChargebeeElixir.Coupon do
+defmodule ExChargebee.Coupon do
   @moduledoc """
   an interface for interacting with Coupons
   """
-  use ChargebeeElixir.Resource, "coupon"
+  use ExChargebee.Resource, "coupon"
 
   def create_for_items(params) do
     create(params, "/create_for_items")

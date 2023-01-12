@@ -1,7 +1,7 @@
-defmodule ChargebeeElixir.CouponTest do
+defmodule ExChargebee.CouponTest do
   use ExUnit.Case
-  doctest ChargebeeElixir.Coupon
-  alias ChargebeeElixir.Coupon
+  doctest ExChargebee.Coupon
+  alias ExChargebee.Coupon
   import Mox
 
   setup :verify_on_exit!
@@ -12,7 +12,7 @@ defmodule ChargebeeElixir.CouponTest do
   describe "create_for_items" do
     test "works with exmaple data from chargebee" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, _headers ->
           assert url ==
@@ -41,7 +41,7 @@ defmodule ChargebeeElixir.CouponTest do
 
     test "works with list of  item_price_ids" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, _headers ->
           assert url ==

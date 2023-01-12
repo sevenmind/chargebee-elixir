@@ -1,4 +1,4 @@
-defmodule ChargebeeElixir.CouponCode do
+defmodule ExChargebee.CouponCode do
   @moduledoc """
   an interface for interacting with Coupon Codes
 
@@ -6,7 +6,7 @@ defmodule ChargebeeElixir.CouponCode do
    - List
    - Retrieve
   """
-  use ChargebeeElixir.Resource, "coupon_code"
+  use ExChargebee.Resource, "coupon_code"
 
   def archive(coupon_code) do
     post_resource(coupon_code, "/archive", %{})

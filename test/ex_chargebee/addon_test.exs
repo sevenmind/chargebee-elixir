@@ -1,4 +1,4 @@
-defmodule ChargebeeElixir.AddonTest do
+defmodule ExChargebee.AddonTest do
   use ExUnit.Case
   import Mox
 
@@ -7,7 +7,7 @@ defmodule ChargebeeElixir.AddonTest do
   describe "retrieve" do
     test "incorrect auth" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :get!,
         fn url, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons/1234"
@@ -19,14 +19,14 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert_raise ChargebeeElixir.UnauthorizedError, fn ->
-        ChargebeeElixir.Addon.retrieve(1234)
+      assert_raise ExChargebee.UnauthorizedError, fn ->
+        ExChargebee.Addon.retrieve(1234)
       end
     end
 
     test "not found" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :get!,
         fn url, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons/1234"
@@ -38,12 +38,12 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert ChargebeeElixir.Addon.retrieve(1234) == nil
+      assert ExChargebee.Addon.retrieve(1234) == nil
     end
 
     test "found" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :get!,
         fn url, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons/1234"
@@ -56,14 +56,14 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert ChargebeeElixir.Addon.retrieve(1234) == %{"id" => 1234}
+      assert ExChargebee.Addon.retrieve(1234) == %{"id" => 1234}
     end
   end
 
   describe "list" do
     test "incorrect auth" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :get!,
         fn url, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons"
@@ -75,14 +75,14 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert_raise ChargebeeElixir.UnauthorizedError, fn ->
-        ChargebeeElixir.Addon.list()
+      assert_raise ExChargebee.UnauthorizedError, fn ->
+        ExChargebee.Addon.list()
       end
     end
 
     test "no param, no offset" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :get!,
         fn url, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons"
@@ -95,12 +95,12 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert ChargebeeElixir.Addon.list() == [%{"id" => 1234}]
+      assert ExChargebee.Addon.list() == [%{"id" => 1234}]
     end
 
     test "headers, offset" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :get!,
         fn url, headers ->
           assert url ==
@@ -119,7 +119,7 @@ defmodule ChargebeeElixir.AddonTest do
       )
 
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :get!,
         fn url, headers ->
           assert url ==
@@ -136,7 +136,7 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert ChargebeeElixir.Addon.list(%{"id[in]": "[1234,1235]"}) == [
+      assert ExChargebee.Addon.list(%{"id[in]": "[1234,1235]"}) == [
                %{"id" => 1234},
                %{"id" => 1235}
              ]
@@ -146,7 +146,7 @@ defmodule ChargebeeElixir.AddonTest do
   describe "create" do
     test "incorrect auth" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons"
@@ -163,14 +163,14 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert_raise ChargebeeElixir.UnauthorizedError, fn ->
-        ChargebeeElixir.Addon.create(%{id: "addon-a"})
+      assert_raise ExChargebee.UnauthorizedError, fn ->
+        ExChargebee.Addon.create(%{id: "addon-a"})
       end
     end
 
     test "incorrect data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons"
@@ -188,14 +188,14 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert_raise ChargebeeElixir.InvalidRequestError, fn ->
-        ChargebeeElixir.Addon.create(%{id: "addon-a"})
+      assert_raise ExChargebee.InvalidRequestError, fn ->
+        ExChargebee.Addon.create(%{id: "addon-a"})
       end
     end
 
     test "correct data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/addons"
@@ -213,7 +213,7 @@ defmodule ChargebeeElixir.AddonTest do
         end
       )
 
-      assert ChargebeeElixir.Addon.create(%{id: "addon-a"}) == %{"id" => "addon-a"}
+      assert ExChargebee.Addon.create(%{id: "addon-a"}) == %{"id" => "addon-a"}
     end
   end
 end

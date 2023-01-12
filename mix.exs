@@ -1,19 +1,19 @@
-defmodule ChargebeeElixir.MixProject do
+defmodule ExChargebee.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :chargebee_elixir,
-      name: "chargebee-elixir",
+      app: :ex_chargebee,
+      name: "ex_chargebee",
       description: "Elixir implementation of Chargebee API (WIP)",
       package: %{
         licenses: ["MIT"],
         links: %{
-          github: "https://github.com/NicolasMarlier/chargebee-elixir"
+          github: "https://github.com/sevenmind/ex_chargebee"
         }
       },
-      source_url: "https://github.com/NicolasMarlier/chargebee-elixir",
-      homepage_url: "https://github.com/NicolasMarlier/chargebee-elixir",
+      source_url: "https://github.com/sevenmind/ex_chargebee",
+      homepage_url: "https://github.com/sevenmind/ex_chargebee",
       version: "0.2.2",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,

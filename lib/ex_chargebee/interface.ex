@@ -1,11 +1,11 @@
-defmodule ChargebeeElixir.Interface do
+defmodule ExChargebee.Interface do
   @moduledoc """
   A low level http interface for interacting with Chargebee V2 HTTP Endpoints
 
   Configuration:
-   - Authorization loaded from Application env `:chargebee_elixir, :api_key`
-   - Chargebee namespace scoping loaded from  Application env  `:chargebee_elixir, :namespace`
-   - Alternative HTTP Clients configured from  Application env `:chargebee_elixir, :http_client` (i.e. in testing)
+   - Authorization loaded from Application env `:ex_chargebee, :api_key`
+   - Chargebee namespace scoping loaded from  Application env  `:ex_chargebee, :namespace`
+   - Alternative HTTP Clients configured from  Application env `:ex_chargebee, :http_client` (i.e. in testing)
   """
 
   def get(path) do
@@ -48,38 +48,38 @@ defmodule ChargebeeElixir.Interface do
       |> Jason.decode!()
       |> Map.get("message")
 
-    raise ChargebeeElixir.InvalidRequestError, message: message, path: path, data: data
+    raise ExChargebee.InvalidRequestError, message: message, path: path, data: data
   end
 
   defp handle_response(%{status_code: 401}, path, data) do
-    raise ChargebeeElixir.UnauthorizedError, path: path, data: data
+    raise ExChargebee.UnauthorizedError, path: path, data: data
   end
 
   defp handle_response(%{status_code: 404}, path, data) do
-    raise ChargebeeElixir.NotFoundError, path: path, data: data
+    raise ExChargebee.NotFoundError, path: path, data: data
   end
 
   defp handle_response(%{status_code: 429}, path, data) do
-    raise ChargebeeElixir.RateLimitError, path: path, data: data
+    raise ExChargebee.RateLimitError, path: path, data: data
   end
 
   defp handle_response(%{} = response, path, data) do
-    raise ChargebeeElixir.UnknownError, path: path, data: data, response: response
+    raise ExChargebee.UnknownError, path: path, data: data, response: response
   end
 
   defp http_client do
-    Application.get_env(:chargebee_elixir, :http_client, HTTPoison)
+    Application.get_env(:ex_chargebee, :http_client, HTTPoison)
   end
 
   defp fullpath(path) do
     # TODO someday: Allow multiple Chargebee Interfaces with multiple namespaces
-    namespace = Application.get_env(:chargebee_elixir, :namespace)
+    namespace = Application.get_env(:ex_chargebee, :namespace)
     "https://#{namespace}.chargebee.com/api/v2#{path}"
   end
 
   defp headers do
     api_key =
-      :chargebee_elixir
+      :ex_chargebee
       |> Application.get_env(:api_key)
       |> Kernel.<>(":")
       |> Base.encode64()

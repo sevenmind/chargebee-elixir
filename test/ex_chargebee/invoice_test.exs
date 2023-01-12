@@ -1,32 +1,28 @@
-defmodule ChargebeeElixir.SubscriptionTest do
+defmodule ExChargebee.InvoiceTest do
   use ExUnit.Case
   import Mox
 
   setup :verify_on_exit!
 
   def subject do
-    ChargebeeElixir.Subscription.create_for_customer(
-      "cus_1",
+    ExChargebee.Invoice.close(
+      "draft_inv_abcde",
       %{
-        plan_id: "plan-a",
-        addons: [
-          %{id: "addon-a"},
-          %{id: "addon-b"}
-        ]
+        "invoice_note" => "This is a note"
       }
     )
   end
 
-  describe "create_for_customer" do
+  describe "close" do
     test "incorrect auth" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url ==
-                   "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions"
+                   "https://test-namespace.chargebee.com/api/v2/invoices/draft_inv_abcde/close"
 
-          assert URI.decode(data) == "addons[id][0]=addon-a&addons[id][1]=addon-b&plan_id=plan-a"
+          assert data == "invoice_note=This+is+a+note"
 
           assert headers == [
                    {"Authorization", "Basic dGVzdF9jaGFyZ2VlYmVlX2FwaV9rZXk6"},
@@ -39,20 +35,20 @@ defmodule ChargebeeElixir.SubscriptionTest do
         end
       )
 
-      assert_raise ChargebeeElixir.UnauthorizedError, fn ->
+      assert_raise ExChargebee.UnauthorizedError, fn ->
         subject()
       end
     end
 
     test "not found" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url ==
-                   "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions"
+                   "https://test-namespace.chargebee.com/api/v2/invoices/draft_inv_abcde/close"
 
-          assert URI.decode(data) == "addons[id][0]=addon-a&addons[id][1]=addon-b&plan_id=plan-a"
+          assert data == "invoice_note=This+is+a+note"
 
           assert headers == [
                    {"Authorization", "Basic dGVzdF9jaGFyZ2VlYmVlX2FwaV9rZXk6"},
@@ -65,20 +61,20 @@ defmodule ChargebeeElixir.SubscriptionTest do
         end
       )
 
-      assert_raise ChargebeeElixir.NotFoundError, fn ->
+      assert_raise ExChargebee.NotFoundError, fn ->
         subject()
       end
     end
 
     test "incorrect data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url ==
-                   "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions"
+                   "https://test-namespace.chargebee.com/api/v2/invoices/draft_inv_abcde/close"
 
-          assert URI.decode(data) == "addons[id][0]=addon-a&addons[id][1]=addon-b&plan_id=plan-a"
+          assert data == "invoice_note=This+is+a+note"
 
           assert headers == [
                    {"Authorization", "Basic dGVzdF9jaGFyZ2VlYmVlX2FwaV9rZXk6"},
@@ -92,20 +88,20 @@ defmodule ChargebeeElixir.SubscriptionTest do
         end
       )
 
-      assert_raise ChargebeeElixir.InvalidRequestError, fn ->
+      assert_raise ExChargebee.InvalidRequestError, fn ->
         subject()
       end
     end
 
     test "correct data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url ==
-                   "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions"
+                   "https://test-namespace.chargebee.com/api/v2/invoices/draft_inv_abcde/close"
 
-          assert URI.decode(data) == "addons[id][0]=addon-a&addons[id][1]=addon-b&plan_id=plan-a"
+          assert data == "invoice_note=This+is+a+note"
 
           assert headers == [
                    {"Authorization", "Basic dGVzdF9jaGFyZ2VlYmVlX2FwaV9rZXk6"},
@@ -114,12 +110,12 @@ defmodule ChargebeeElixir.SubscriptionTest do
 
           %{
             status_code: 200,
-            body: '{"subscription": {"id": "sub-a"}}'
+            body: '{"invoice": {"id": "abcde"}}'
           }
         end
       )
 
-      assert subject() == %{"id" => "sub-a"}
+      assert subject() == %{"id" => "abcde"}
     end
   end
 end

@@ -1,4 +1,4 @@
-defmodule ChargebeeElixir.PortalSessionTest do
+defmodule ExChargebee.PortalSessionTest do
   use ExUnit.Case
   import Mox
 
@@ -7,7 +7,7 @@ defmodule ChargebeeElixir.PortalSessionTest do
   describe "create" do
     test "incorrect auth" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/portal_sessions"
@@ -24,14 +24,14 @@ defmodule ChargebeeElixir.PortalSessionTest do
         end
       )
 
-      assert_raise ChargebeeElixir.UnauthorizedError, fn ->
-        ChargebeeElixir.PortalSession.create(%{})
+      assert_raise ExChargebee.UnauthorizedError, fn ->
+        ExChargebee.PortalSession.create(%{})
       end
     end
 
     test "incorrect data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/portal_sessions"
@@ -49,14 +49,14 @@ defmodule ChargebeeElixir.PortalSessionTest do
         end
       )
 
-      assert_raise ChargebeeElixir.InvalidRequestError, fn ->
-        ChargebeeElixir.PortalSession.create(%{})
+      assert_raise ExChargebee.InvalidRequestError, fn ->
+        ExChargebee.PortalSession.create(%{})
       end
     end
 
     test "correct data" do
       expect(
-        ChargebeeElixir.HTTPoisonMock,
+        ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url == "https://test-namespace.chargebee.com/api/v2/portal_sessions"
@@ -76,7 +76,7 @@ defmodule ChargebeeElixir.PortalSessionTest do
         end
       )
 
-      assert ChargebeeElixir.PortalSession.create(%{
+      assert ExChargebee.PortalSession.create(%{
                redirect_url: "https://redirect.com",
                customer: %{
                  id: "cus_1234"

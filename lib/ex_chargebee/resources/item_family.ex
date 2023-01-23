@@ -1,6 +1,6 @@
 defmodule ExChargebee.ItemFamily do
   @moduledoc """
-  an interface for interacting with Items
+  an interface for interacting with Item Families
   """
-  use ExChargebee.Resource, "item_family"
+  use ExChargebee.Resource
 end

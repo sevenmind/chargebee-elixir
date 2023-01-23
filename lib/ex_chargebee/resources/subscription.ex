@@ -2,7 +2,7 @@ defmodule ExChargebee.Subscription do
   @moduledoc """
   an interface for interacting with Subscriptions
   """
-  use ExChargebee.Resource, "subscription"
+  use ExChargebee.Resource
 
   def create_for_customer(customer_id, params) do
     customer_id

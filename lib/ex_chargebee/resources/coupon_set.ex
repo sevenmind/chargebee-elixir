@@ -8,7 +8,7 @@ defmodule ExChargebee.CouponSet do
    - Create
    - Update
   """
-  use ExChargebee.Resource, "coupon_set"
+  use ExChargebee.Resource
 
   def add_coupon_codes(coupon_id, params) do
     post_resource(coupon_id, "/add_coupon_codes", params)

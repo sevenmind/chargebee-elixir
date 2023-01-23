@@ -1,6 +1,6 @@
 defmodule ExChargebee.ItemPrice do
   @moduledoc """
-  an interface for interacting with Items
+  an interface for interacting with Item Prices
   """
-  use ExChargebee.Resource, "item_price"
+  use ExChargebee.Resource
 end

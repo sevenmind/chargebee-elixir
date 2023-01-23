@@ -6,7 +6,7 @@ defmodule ExChargebee.CouponCode do
    - List
    - Retrieve
   """
-  use ExChargebee.Resource, "coupon_code"
+  use ExChargebee.Resource
 
   def archive(coupon_code) do
     post_resource(coupon_code, "/archive", %{})

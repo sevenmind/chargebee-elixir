@@ -2,7 +2,7 @@ defmodule ExChargebee.Customer do
   @moduledoc """
   an interface for interacting with Customers
   """
-  use ExChargebee.Resource, "customer"
+  use ExChargebee.Resource
 
   @doc """
   Merge `from_customer_id` into `to_customer_id`

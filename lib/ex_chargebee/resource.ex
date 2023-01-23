@@ -1,10 +1,13 @@
 defmodule ExChargebee.Resource do
   @moduledoc false
-  defmacro __using__(resource) do
+  defmacro __using__(_) do
     quote location: :keep do
       alias ExChargebee.Interface
 
-      @resource unquote(resource)
+      @resource __MODULE__
+                |> Module.split()
+                |> List.last()
+                |> Macro.underscore()
       @resource_plural Inflex.pluralize(@resource)
 
       def retrieve(id) do

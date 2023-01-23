@@ -6,6 +6,7 @@ defmodule ExChargebee.MixProject do
       app: :ex_chargebee,
       name: "ex_chargebee",
       description: "Elixir implementation of Chargebee API (WIP)",
+      organization: "sevenmind",
       package: %{
         licenses: ["MIT"],
         links: %{
@@ -14,7 +15,7 @@ defmodule ExChargebee.MixProject do
       },
       source_url: "https://github.com/sevenmind/ex_chargebee",
       homepage_url: "https://github.com/sevenmind/ex_chargebee",
-      version: "0.2.2",
+      version: "0.2.3",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps()

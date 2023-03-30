@@ -39,7 +39,7 @@ defmodule ExChargebee.MixProject do
       {:mox, "~>1.0", only: [:test]},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
-      {:ex_check, "~> 0.14.0", only: [:dev], runtime: false}
+      {:ex_check, "~> 0.14", only: [:dev], runtime: false}
     ]
   end
 end

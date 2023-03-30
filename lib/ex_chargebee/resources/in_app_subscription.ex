@@ -17,4 +17,10 @@ defmodule ExChargebee.InAppSubscription do
   def import_receipt(in_app_subscription_app_id, params) do
     post_resource(in_app_subscription_app_id, "/import_receipt", params)
   end
+
+  # TODO: notifications accepts standard application/json unmodified from the
+  # google play or apple store webhooks.
+  # def notifications(in_app_subscription_app_id, params) do
+  #   post_resource(in_app_subscription_app_id, "/notifications", params)
+  # end
 end

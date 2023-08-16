@@ -1,8 +1,13 @@
 defmodule ExChargebee.Resource do
   @moduledoc false
-  defmacro __using__(_) do
+  
+  defmacro __using__(opts \\ []) do
+    get_operations = Keyword.get(opts, :get_operations, [])
+    post_operations = Keyword.get(opts, :post_operations, [])
+
     quote location: :keep do
       alias ExChargebee.Interface
+      import ExChargebee.Resource
 
       @resource __MODULE__
                 |> Module.split()
@@ -10,8 +15,8 @@ defmodule ExChargebee.Resource do
                 |> Macro.underscore()
       @resource_plural Inflex.pluralize(@resource)
 
-      def retrieve(id) do
-        id |> resource_path() |> Interface.get() |> Map.get(@resource)
+      def retrieve(resource_id) do
+        get_resource(resource_id)
       rescue
         ExChargebee.NotFoundError -> nil
       end
@@ -52,6 +57,14 @@ defmodule ExChargebee.Resource do
         |> Map.get(@resource)
       end
 
+      def get_resource(resource_id, endpoint \\ "", params \\ %{}) do
+        resource_id
+        |> resource_path()
+        |> Kernel.<>(endpoint)
+        |> Interface.get(params)
+        |> Map.get(@resource)
+      end
+
       def post_resource(resource_id, endpoint, params) do
         resource_id
         |> resource_path()
@@ -84,6 +97,24 @@ defmodule ExChargebee.Resource do
         encoded_id = id |> to_string |> URI.encode()
 
         "#{resource_base_path()}/#{encoded_id}"
+      end
+
+      ExChargebee.Resource.generate_operations(unquote(get_operations), "get")
+      ExChargebee.Resource.generate_operations(unquote(post_operations), "post")
+    end
+  end
+
+  defmacro generate_operations(operations, verb) do
+    for operation <- operations do
+      quote do
+        @spec unquote(operation)(String.t(), map()) :: map() | nil
+        def unquote(operation)(subscription_id, params) do
+          apply(__MODULE__, "#{unquote(verb)}_resource", [
+            subscription_id,
+            "/#{unquote(operation)}",
+            params
+          ])
+        end
       end
     end
   end

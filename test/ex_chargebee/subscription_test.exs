@@ -122,4 +122,85 @@ defmodule ExChargebee.SubscriptionTest do
       assert subject() == %{"id" => "sub-a"}
     end
   end
+
+  describe "post_operations" do
+    post_operations = [
+      :add_charge_at_term_end,
+      :cancel_for_items,
+      :change_term_end,
+      :charge_future_renewals,
+      :delete,
+      :edit_advance_invoice_schedule,
+      :import_contract_term,
+      :import_for_items,
+      :override_billing_profile,
+      :pause,
+      :reactivate,
+      :regenerate_invoice,
+      :remove_advance_invoice_schedule,
+      :remove_coupons,
+      :remove_scheduled_cancellation,
+      :remove_scheduled_changes,
+      :remove_scheduled_pause,
+      :remove_scheduled_resumption,
+      :resume,
+      :retrieve_advance_invoice_schedule,
+      :subscription_for_items,
+      :update_for_items
+    ]
+
+    Enum.map(post_operations, fn operation ->
+      test "#{operation}" do
+        operation = unquote(operation)
+        mock_post(operation, "sub-a")
+        assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
+      end
+    end)
+  end
+
+  describe "get_operations" do
+    get_operations = [:contract_terms, :discounts, :retrieve_with_scheduled_changes]
+
+    Enum.map(get_operations, fn operation ->
+      test "#{operation}" do
+        operation = unquote(operation)
+        mock_get(operation, "sub-a")
+        assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
+      end
+    end)
+  end
+
+  def mock_post(operation, id) do
+    expect(
+      ExChargebee.HTTPoisonMock,
+      :post!,
+      fn url, data, headers ->
+        assert url ==
+                 "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions" <>
+                   "/" <> id <> "/" <> operation
+
+        %{
+          status_code: 200,
+          body: '{"subscription": {"id": "sub-a"}}'
+        }
+      end
+    )
+  end
+
+  def mock_get(operation, id) do
+    expect(
+      ExChargebee.HTTPoisonMock,
+      :get!,
+      fn url, data, headers ->
+        assert url ==
+                 "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions" <>
+                   "/" <> id <> "/" <> operation
+
+        %{
+          status_code: 200,
+          body: '{"subscription": {"id": "sub-a"}}'
+        }
+      end
+    )
+  end
 end

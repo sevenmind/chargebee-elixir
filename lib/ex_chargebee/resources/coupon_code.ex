@@ -8,7 +8,7 @@ defmodule ExChargebee.CouponCode do
   """
   use ExChargebee.Resource
 
-  def archive(coupon_code) do
-    post_resource(coupon_code, "/archive", %{})
+  def archive(coupon_code, opts \\ []) do
+    post_resource(coupon_code, "/archive", %{}, opts)
   end
 end

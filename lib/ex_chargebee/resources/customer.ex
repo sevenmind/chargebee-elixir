@@ -11,7 +11,7 @@ defmodule ExChargebee.Customer do
   notes, transactions, unbilled charges, and orders to another customer. Events
   and email logs will not be moved. The API execution is asynchronous.
   """
-  def merge(to_customer_id, from_customer_id) do
-    create(%{to_customer_id: to_customer_id, from_customer_id: from_customer_id}, "/merge")
+  def merge(to_customer_id, from_customer_id, opts \\ []) do
+    create(%{to_customer_id: to_customer_id, from_customer_id: from_customer_id}, "/merge", opts)
   end
 end

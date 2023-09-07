@@ -168,16 +168,36 @@ defmodule ExChargebee.SubscriptionTest do
         assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
       end
     end)
+
+    test "when opts site is passed" do
+      Application.put_env(:ex_chargebee, :test_site, namespace: "baz-bar", api_key: "foo")
+
+      expect(
+        ExChargebee.HTTPoisonMock,
+        :get!,
+        fn url, _headers ->
+          assert url ==
+                   "https://baz-bar.chargebee.com/api/v2/subscriptions/sub-a/contract_terms"
+
+          %{
+            status_code: 200,
+            body: '{"subscription": {"id": "sub-a"}}'
+          }
+        end
+      )
+
+      assert apply(ExChargebee.Subscription, :contract_terms, ["sub-a", %{}, [site: :test_site]])
+    end
   end
 
   def mock_post(operation, id) do
     expect(
       ExChargebee.HTTPoisonMock,
       :post!,
-      fn url, data, headers ->
+      fn url, _data, _headers ->
         assert url ==
-                 "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions" <>
-                   "/" <> id <> "/" <> operation
+                 "https://test-namespace.chargebee.com/api/v2/subscriptions" <>
+                   "/" <> id <> "/" <> to_string(operation)
 
         %{
           status_code: 200,
@@ -191,10 +211,9 @@ defmodule ExChargebee.SubscriptionTest do
     expect(
       ExChargebee.HTTPoisonMock,
       :get!,
-      fn url, data, headers ->
+      fn url, _headers ->
         assert url ==
-                 "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscriptions" <>
-                   "/" <> id <> "/" <> operation
+                 "https://test-namespace.chargebee.com/api/v2/subscriptions/#{id}/#{operation}"
 
         %{
           status_code: 200,

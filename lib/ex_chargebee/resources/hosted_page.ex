@@ -4,11 +4,11 @@ defmodule ExChargebee.HostedPage do
   """
   use ExChargebee.Resource
 
-  def checkout_new(params) do
-    create(params, "/checkout_new")
+  def checkout_new(params, opts \\ []) do
+    create(params, "/checkout_new", opts)
   end
 
-  def checkout_existing(params) do
-    create(params, "/checkout_existing")
+  def checkout_existing(params, opts \\ []) do
+    create(params, "/checkout_existing", opts)
   end
 end

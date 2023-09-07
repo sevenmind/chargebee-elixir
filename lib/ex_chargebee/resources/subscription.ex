@@ -29,13 +29,13 @@ defmodule ExChargebee.Subscription do
     ],
     get_operations: [:contract_terms, :discounts, :retrieve_with_scheduled_changes]
 
-  def create_for_customer(customer_id, params) do
+  def create_for_customer(customer_id, params, opts \\ []) do
     customer_id
     |> ExChargebee.Customer.resource_path()
-    |> create_for_parent(params)
+    |> create_for_parent(params, "", opts)
   end
 
-  def import_unbilled_charges(params) do
-    post_resource("import_unbilled_charges", "/import_unbilled_charges", params)
+  def import_unbilled_charges(params, opts \\ []) do
+    post_resource("import_unbilled_charges", "/import_unbilled_charges", params, opts)
   end
 end

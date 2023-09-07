@@ -12,28 +12,32 @@ defmodule ExChargebee.Interface do
     get(path, %{})
   end
 
-  def get(path, params) do
+  def get(path, params, opts \\ []) do
     params_string = URI.encode_query(params)
 
     url =
-      [fullpath(path), params_string]
+      [fullpath(path, opts), params_string]
       |> Enum.filter(fn s -> String.length(s) > 0 end)
       |> Enum.join("?")
 
-    http_client().get!(url, headers())
+    http_client().get!(url, headers(opts))
     |> handle_response(path, params)
   end
 
-  def post(path, data) do
+  def post(path, data, opts \\ []) do
     body =
       data
       |> serialize()
       |> URI.encode_query()
 
-    http_client().post!(
-      fullpath(path),
+    fullpath = fullpath(path, opts)
+    client = http_client()
+    headers = headers(opts) ++ [{"Content-Type", "application/x-www-form-urlencoded"}]
+
+    client.post!(
+      fullpath,
       body,
-      headers() ++ [{"Content-Type", "application/x-www-form-urlencoded"}]
+      headers
     )
     |> handle_response(path, data)
   end
@@ -71,22 +75,32 @@ defmodule ExChargebee.Interface do
     Application.get_env(:ex_chargebee, :http_client, HTTPoison)
   end
 
-  defp fullpath(path) do
-    # TODO someday: Allow multiple Chargebee Interfaces with multiple namespaces
-    namespace = Application.get_env(:ex_chargebee, :namespace)
+  defp fullpath(path, opts) do
+    namespace = config(opts, :namespace)
     "https://#{namespace}.chargebee.com/api/v2#{path}"
   end
 
-  defp headers do
+  defp headers(opts) do
     api_key =
-      :ex_chargebee
-      |> Application.get_env(:api_key)
+      opts
+      |> config(:api_key)
       |> Kernel.<>(":")
       |> Base.encode64()
 
     [
       {"Authorization", "Basic " <> api_key}
     ]
+  end
+
+  defp config(opts, path) do
+    case opts[:site] do
+      nil ->
+        Application.get_all_env(:ex_chargebee)
+
+      site ->
+        Application.get_env(:ex_chargebee, site)
+    end
+    |> Keyword.fetch!(path)
   end
 
   # serialize/3 is a 1:1 adaptation of Chargebee-Ruby `Chargebee::Util.serialize/3`

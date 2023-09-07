@@ -4,7 +4,7 @@ defmodule ExChargebee.NonSubscription do
   """
   use ExChargebee.Resource
 
-  def one_time_purchase(non_subscription_app_id, params) do
-    post_resource(non_subscription_app_id, "/one_time_purchase", params)
+  def one_time_purchase(non_subscription_app_id, params, opts \\ []) do
+    post_resource(non_subscription_app_id, "/one_time_purchase", params, opts)
   end
 end

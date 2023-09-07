@@ -1,6 +1,6 @@
 defmodule ExChargebee.Resource do
   @moduledoc false
-  
+
   defmacro __using__(opts \\ []) do
     get_operations = Keyword.get(opts, :get_operations, [])
     post_operations = Keyword.get(opts, :post_operations, [])
@@ -15,25 +15,25 @@ defmodule ExChargebee.Resource do
                 |> Macro.underscore()
       @resource_plural Inflex.pluralize(@resource)
 
-      def retrieve(resource_id) do
-        get_resource(resource_id)
+      def retrieve(resource_id, opts \\ []) do
+        get_resource(resource_id, "", opts)
       rescue
         ExChargebee.NotFoundError -> nil
       end
 
-      def list(params \\ %{}) do
+      def list(params \\ %{}, opts \\ []) do
         params
-        |> stream_list()
+        |> stream_list(opts)
         |> Enum.to_list()
       end
 
-      def stream_list(params \\ %{}) do
+      def stream_list(params \\ %{}, opts \\ []) do
         Stream.unfold(0, fn
           nil ->
             nil
 
           0 ->
-            response = Interface.get(resource_base_path(), params)
+            response = Interface.get(resource_base_path(), params, opts)
 
             list = Map.get(response, "list")
             next_offset = Map.get(response, "next_offset")
@@ -42,7 +42,7 @@ defmodule ExChargebee.Resource do
 
           offset ->
             params = Map.merge(params, %{"offset" => offset})
-            response = Interface.get(resource_base_path(), params)
+            response = Interface.get(resource_base_path(), params, opts)
 
             {Map.get(response, "list"), Map.get(response, "next_offset")}
         end)
@@ -50,42 +50,42 @@ defmodule ExChargebee.Resource do
         |> Stream.map(&Map.get(&1, @resource))
       end
 
-      def create(params, path \\ "") do
+      def create(params, path \\ "", opts \\ []) do
         resource_base_path()
         |> Kernel.<>(path)
-        |> Interface.post(params)
+        |> Interface.post(params, opts)
         |> Map.get(@resource)
       end
 
-      def get_resource(resource_id, endpoint \\ "", params \\ %{}) do
+      def get_resource(resource_id, endpoint \\ "", params \\ %{}, opts \\ []) do
         resource_id
         |> resource_path()
         |> Kernel.<>(endpoint)
-        |> Interface.get(params)
+        |> Interface.get(params, opts)
         |> Map.get(@resource)
       end
 
-      def post_resource(resource_id, endpoint, params) do
+      def post_resource(resource_id, endpoint, params, opts \\ []) do
         resource_id
         |> resource_path()
         |> Kernel.<>(endpoint)
-        |> Interface.post(params)
+        |> Interface.post(params, opts)
         |> Map.get(@resource)
       end
 
-      def create_for_parent(parent_path, params, path \\ "") do
+      def create_for_parent(parent_path, params, path \\ "", opts \\ []) do
         parent_path
         |> Kernel.<>(resource_base_path())
         |> Kernel.<>(path)
-        |> Interface.post(params)
+        |> Interface.post(params, opts)
         |> Map.get(@resource)
       end
 
-      def update(resource_id, params, path \\ "") do
+      def update(resource_id, params, path \\ "", opts \\ []) do
         resource_id
         |> resource_path()
         |> Kernel.<>(path)
-        |> Interface.post(params)
+        |> Interface.post(params, opts)
         |> Map.get(@resource)
       end
 
@@ -108,11 +108,12 @@ defmodule ExChargebee.Resource do
     for operation <- operations do
       quote do
         @spec unquote(operation)(String.t(), map()) :: map() | nil
-        def unquote(operation)(subscription_id, params) do
-          apply(__MODULE__, "#{unquote(verb)}_resource", [
+        def unquote(operation)(subscription_id, params, opts \\ []) do
+          apply(__MODULE__, :"#{unquote(verb)}_resource", [
             subscription_id,
             "/#{unquote(operation)}",
-            params
+            params,
+            opts
           ])
         end
       end

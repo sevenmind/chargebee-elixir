@@ -4,7 +4,7 @@ defmodule ExChargebee.Invoice do
   """
   use ExChargebee.Resource
 
-  def close(id, params \\ %{}) do
-    post_resource(id, "/close", params)
+  def close(id, params \\ %{}, opts \\ []) do
+    post_resource(id, "/close", params, opts)
   end
 end

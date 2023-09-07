@@ -16,7 +16,7 @@ defmodule ExChargebee.Resource do
       @resource_plural Inflex.pluralize(@resource)
 
       def retrieve(resource_id, opts \\ []) do
-        get_resource(resource_id, "", opts)
+        get_resource(resource_id, "", %{}, opts)
       rescue
         ExChargebee.NotFoundError -> nil
       end

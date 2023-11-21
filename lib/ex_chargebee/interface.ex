@@ -156,4 +156,36 @@ defmodule ExChargebee.Interface do
 
     [{key, value}]
   end
+
+  def stream_list(path, params, opts) do
+    Stream.unfold(0, fn
+      nil ->
+        nil
+
+      0 ->
+        response = get(path, params, opts)
+
+        list = Map.get(response, "list")
+        next_offset = Map.get(response, "next_offset")
+
+        {list, next_offset}
+
+      offset ->
+        params = Map.merge(params, %{"offset" => offset})
+        response = get(path, params, opts)
+
+        {Map.get(response, "list"), Map.get(response, "next_offset")}
+    end)
+  end
+
+  def stream_list(path, params, opts, resource_name) do
+    stream_list(path, params, opts)
+    |> Stream.flat_map(& &1)
+    |> Stream.map(&Map.get(&1, resource_name))
+  end
+
+  def post_resource(path, params, opt, resource_name) do
+    post(path, params, opt)
+    |> Map.get(resource_name)
+  end
 end

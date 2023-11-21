@@ -24,18 +24,51 @@ defmodule ExChargebee.Subscription do
       :remove_scheduled_resumption,
       :resume,
       :retrieve_advance_invoice_schedule,
-      :subscription_for_items,
       :update_for_items
     ],
     get_operations: [:contract_terms, :discounts, :retrieve_with_scheduled_changes]
 
-  def create_for_customer(customer_id, params, opts \\ []) do
-    customer_id
-    |> ExChargebee.Customer.resource_path()
-    |> create_for_parent(params, "", opts)
+  @doc """
+  [chargebee docs](https://apidocs.chargebee.com/docs/api/subscriptions?lang=curl#import_unbilled_charges)
+  """
+  def import_unbilled_charges(params, opts \\ []) do
+    "import_unbilled_charges"
+    |> resource_path("/import_unbilled_charges")
+    |> ExChargebee.Interface.post(params, opts)
+    |> Map.get("unbilled_charges")
   end
 
-  def import_unbilled_charges(params, opts \\ []) do
-    post_resource("import_unbilled_charges", "/import_unbilled_charges", params, opts)
+  @doc """
+  Return a list of Subscription usages
+  [chargebee docs](https://apidocs.chargebee.com/docs/api/usages?lang=curl#list_usages)
+  """
+  def list_usages(subscription_id, params, opts \\ []) do
+    ExChargebee.Interface.stream_list(
+      params,
+      resource_path(subscription_id, "/usages"),
+      "usage",
+      opts
+    )
+    |> Enum.to_list()
+  end
+
+  @doc """
+  Create a Subscription usage
+  [chargebee docs](https://apidocs.chargebee.com/docs/api/usages?lang=curl#create_a_usage)
+  """
+  def create_usage(subscription_id, params, opts \\ []) do
+    resource_path(subscription_id, "/usages")
+    |> ExChargebee.Interface.post(params, opts)
+    |> Map.get("usage")
+  end
+
+  @doc """
+  Create a Subscription usage
+  [chargebee docs](https://apidocs.chargebee.com/docs/api/usages?lang=curl#delete_a_usage)
+  """
+  def delete_usage(subscription_id, params, opts \\ []) do
+    resource_path(subscription_id, "/delete_usage")
+    |> ExChargebee.Interface.post(params, opts)
+    |> Map.get("usage")
   end
 end

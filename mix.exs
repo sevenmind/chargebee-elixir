@@ -15,7 +15,7 @@ defmodule ExChargebee.MixProject do
       },
       source_url: "https://github.com/sevenmind/ex_chargebee",
       homepage_url: "https://github.com/sevenmind/ex_chargebee",
-      version: "0.3.1",
+      version: "0.4.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps()

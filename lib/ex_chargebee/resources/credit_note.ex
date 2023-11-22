@@ -5,7 +5,6 @@ defmodule ExChargebee.CreditNote do
   use ExChargebee.Resource,
     stdops: [:create, :list, :retrieve, :delete],
     post_operations: [
-      :delete,
       :pdf,
       :record_refund,
       :refund,

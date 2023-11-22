@@ -106,7 +106,7 @@ defmodule ExChargebee.CustomerTest do
   end
 
   describe "post_operations" do
-    post_operations = Customer.operations()[:post_operations]
+    post_operations = Customer.operations(:post_operations)
 
     Enum.map(post_operations, fn operation ->
       test "#{operation}" do
@@ -118,7 +118,7 @@ defmodule ExChargebee.CustomerTest do
   end
 
   describe "get_operations" do
-    get_operations = Customer.operations()[:get_operations]
+    get_operations = Customer.operations(:get_operations)
 
     Enum.map(get_operations, fn operation ->
       test "#{operation}" do
@@ -127,6 +127,60 @@ defmodule ExChargebee.CustomerTest do
         assert apply(ExChargebee.Customer, operation, ["cus_1", %{}, []])
       end
     end)
+  end
+
+  test "get hierarchy" do
+    expect(
+      ExChargebee.HTTPoisonMock,
+      :get!,
+      fn url, _headers ->
+        assert url ==
+                 "https://test-namespace.chargebee.com/api/v2/customers/cus_1/hierarchy"
+
+        %{
+          status_code: 200,
+          body: ~S'{"hierarchies": [{"id": "sub-a"}]}'
+        }
+      end
+    )
+
+    assert Customer.hierarchy("cus_1", %{}, []) == [%{"id" => "sub-a"}]
+  end
+
+  test "list_contacts" do
+    expect(
+      ExChargebee.HTTPoisonMock,
+      :get!,
+      fn url, _headers ->
+        assert url ==
+                 "https://test-namespace.chargebee.com/api/v2/customers/cus_1/contacts"
+
+        %{
+          status_code: 200,
+          body: ~S'{"list": [{"contact":{"id": "sub-a"}}]}'
+        }
+      end
+    )
+
+    assert Customer.list_contacts("cus_1", %{}, []) == [%{"id" => "sub-a"}]
+  end
+
+  test "list_payment_voucher" do
+    expect(
+      ExChargebee.HTTPoisonMock,
+      :get!,
+      fn url, _headers ->
+        assert url ==
+                 "https://test-namespace.chargebee.com/api/v2/customers/cus_1/payment_vouchers"
+
+        %{
+          status_code: 200,
+          body: ~S'{"list": [{"payment_voucher":{"id": "sub-a"}}]}'
+        }
+      end
+    )
+
+    assert Customer.list_payment_vouchers("cus_1", %{}, []) == [%{"id" => "sub-a"}]
   end
 
   def mock_post(operation, id) do

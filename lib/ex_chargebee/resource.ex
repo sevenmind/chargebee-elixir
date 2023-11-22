@@ -87,41 +87,42 @@ defmodule ExChargebee.Resource do
                 |> Macro.underscore()
       @resource_plural Inflex.pluralize(@resource)
 
-      def resource_base_path(path \\ "")
+      defp resource_base_path(path \\ "")
 
-      def resource_base_path("") do
+      defp resource_base_path("") do
         "/#{@resource_plural}"
       end
 
-      def resource_base_path("/" <> _rest = path) do
+      defp resource_base_path("/" <> _rest = path) do
         "/#{@resource_plural}#{path}"
       end
 
-      def resource_base_path(path) do
+      defp resource_base_path(path) do
         "/#{@resource_plural}/#{path}"
       end
 
-      def resource_path(id, path \\ "")
+      defp resource_path(id, path \\ "")
 
-      def resource_path(id, "") do
+      defp resource_path(id, "") do
         encoded_id = id |> to_string |> URI.encode()
 
         "#{resource_base_path()}/#{encoded_id}"
       end
 
-      def resource_path(id, "/" <> _rest = path) do
+      defp resource_path(id, "/" <> _rest = path) do
         encoded_id = id |> to_string |> URI.encode()
 
         "#{resource_base_path()}/#{encoded_id}#{path}"
       end
 
-      def resource_path(id, path) do
+      defp resource_path(id, path) do
         encoded_id = id |> to_string |> URI.encode()
 
         "#{resource_base_path()}/#{encoded_id}/#{path}"
       end
 
       # expose operations for testing
+      @spec operations() :: Keyword.t()
       def operations do
         Keyword.take(unquote(opts), [
           :get_operations,
@@ -132,6 +133,10 @@ defmodule ExChargebee.Resource do
         ])
         |> Keyword.update(:list_operations, [], &Enum.map(&1, fn v -> :"list_#{v}" end))
         |> Keyword.update(:list_root_operations, [], &Enum.map(&1, fn v -> :"list_#{v}" end))
+      end
+
+      def operations(group) do
+        Keyword.get(operations(), group, [])
       end
 
       unquote(define_stdops(opts, resource))
@@ -166,7 +171,7 @@ defmodule ExChargebee.Resource do
       ])
 
     if stdops && is_list(stdops) do
-      for op <- stdops do
+      for op <- Enum.uniq(stdops) do
         defstdop(op, resource)
       end
     end
@@ -215,15 +220,16 @@ defmodule ExChargebee.Resource do
         @spec unquote(operation_name)(String.t(), map(), keyword()) :: [map()] | nil
         def unquote(operation_name)(resource_id, params \\ %{}, opts \\ []) do
           path = resource_path(resource_id, unquote(operation))
+          resource_name = Inflex.singularize(unquote(operation))
 
           if Keyword.get(opts, :paginate, true) do
             path
-            |> Interface.stream_list(params, opts, unquote(resource))
+            |> Interface.stream_list(params, opts, resource_name)
             |> Enum.to_list()
           else
             path
             |> Interface.get(params, opts)
-            |> Map.update("list", [], &Map.get(&1, unquote(resource)))
+            |> Map.update("list", [], &Map.get(&1, resource_name))
           end
         end
       end
@@ -341,7 +347,7 @@ defmodule ExChargebee.Resource do
 
       Find more information in [the Chargebee Documentation](https://apidocs.chargebee.com/docs/api/#{resource_plural}#create_#{resource})
       """
-
+      @spec create(map(), keyword()) :: map() | nil
       def create(params, opts \\ []) do
         resource_base_path()
         |> Interface.post(params, opts)
@@ -360,11 +366,10 @@ defmodule ExChargebee.Resource do
 
       Find more information in [the Chargebee Documentation](https://apidocs.chargebee.com/docs/api/#{resource_plural}#update_#{resource})
       """
-
-      def update(resource_id, params, path \\ "", opts \\ []) do
+      @spec update(String.t(), map(), keyword()) :: map() | nil
+      def update(resource_id, params, opts \\ []) do
         resource_id
         |> resource_path()
-        |> Kernel.<>(path)
         |> Interface.post(params, opts)
         |> Map.get(unquote(resource))
       end
@@ -372,9 +377,9 @@ defmodule ExChargebee.Resource do
   end
 
   def defstdop(:delete, resource) do
-    quote location: :keep do
-      ExChargebee.Resource.generate_operations([:delete], :post, unquote(resource))
-    end
+    # quote location: :keep do
+    ExChargebee.Resource.generate_operations([:delete], :post, resource)
+    # end
   end
 
   def defstdop(other, resource) do

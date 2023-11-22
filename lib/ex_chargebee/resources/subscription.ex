@@ -13,7 +13,6 @@ defmodule ExChargebee.Subscription do
       :cancel_for_items,
       :change_term_end,
       :charge_future_renewals,
-      :delete,
       :edit_advance_invoice_schedule,
       :import_contract_term,
       :import_for_items,

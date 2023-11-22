@@ -120,7 +120,7 @@ defmodule ExChargebee.InvoiceTest do
   end
 
   describe "Invoice.list_root_operations" do
-    post_operations = ExChargebee.Invoice.operations()[:list_root_operations]
+    post_operations = ExChargebee.Invoice.operations(:list_root_operations)
 
     Enum.map(post_operations, fn operation ->
       test "Invoice.#{operation}" do
@@ -132,19 +132,24 @@ defmodule ExChargebee.InvoiceTest do
   end
 
   describe "Invoice.list_operations" do
-    operaations = ExChargebee.Invoice.operations()[:list_operations]
+    operations = ExChargebee.Invoice.operations(:list_operations)
 
-    Enum.map(operaations, fn operation ->
+    Enum.map(operations, fn operation ->
       test "Invoice.#{operation}" do
         operation = unquote(operation)
         mock_list(operation, "sub-a")
-        assert apply(ExChargebee.Invoice, operation, ["sub-a", %{}])
+
+        assert apply(ExChargebee.Invoice, operation, ["sub-a", %{}]) == [
+                 %{
+                   "id" => "sub-a"
+                 }
+               ]
       end
     end)
   end
 
   describe "post_root_operations" do
-    post_operations = ExChargebee.Invoice.operations()[:post_root_operations]
+    post_operations = ExChargebee.Invoice.operations(:post_root_operations)
 
     Enum.map(post_operations, fn operation ->
       test "Invoice.#{operation}" do
@@ -156,7 +161,7 @@ defmodule ExChargebee.InvoiceTest do
   end
 
   describe "post_operations" do
-    post_operations = ExChargebee.Invoice.operations()[:post_operations]
+    post_operations = ExChargebee.Invoice.operations(:post_operations)
 
     Enum.map(post_operations, fn
       {type, operation} ->
@@ -176,7 +181,7 @@ defmodule ExChargebee.InvoiceTest do
   end
 
   describe "get_operations" do
-    post_operations = ExChargebee.Invoice.operations()[:get_operations]
+    post_operations = ExChargebee.Invoice.operations(:get_operations)
 
     Enum.map(post_operations, fn
       {type, operation} ->
@@ -256,6 +261,7 @@ defmodule ExChargebee.InvoiceTest do
 
   def mock_list(operation, id) do
     resource_name = String.replace_prefix(to_string(operation), "list_", "")
+    resource = Inflex.singularize(resource_name)
 
     expect(
       ExChargebee.HTTPoisonMock,
@@ -270,7 +276,7 @@ defmodule ExChargebee.InvoiceTest do
             Jason.encode!(%{
               "list" => [
                 %{
-                  "invoice" => %{
+                  resource => %{
                     "id" => "sub-a"
                   }
                 }

@@ -74,4 +74,24 @@ defmodule ExChargebee.CouponTest do
              }) == %{"id" => "summer_offer"}
     end
   end
+
+  describe "delete/1" do
+    test "calls delete endpoint" do
+      expect(
+        ExChargebee.HTTPoisonMock,
+        :post!,
+        fn url, _data, _headers ->
+          assert url ==
+                   "https://test-namespace.chargebee.com/api/v2/coupons/summer_offer/delete"
+
+          %{
+            status_code: 200,
+            body: ~S'{"coupon": {"id": "summer_offer"}}'
+          }
+        end
+      )
+
+      assert Coupon.delete("summer_offer") == %{"id" => "summer_offer"}
+    end
+  end
 end

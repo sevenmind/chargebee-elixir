@@ -4,6 +4,11 @@ defmodule ExChargebee.Quote do
   """
 
   use ExChargebee.Resource,
+    stdops: [
+      :retrieve,
+      :list,
+      :delete
+    ],
     post_operations: [
       :edit_create_subscription_quote_for_items,
       :edit_update_subscription_quote_for_items,
@@ -11,16 +16,11 @@ defmodule ExChargebee.Quote do
       :convert,
       :update_status,
       :extend_expiry_date,
-      :delete
+      {"download", :pdf}
     ],
     post_root_operations: [
       :update_subscription_quote_for_items,
       :create_for_charge_items_and_charges
     ],
     list_operations: [:quote_line_groups]
-
-  def pdf(quote_id, params \\ %{}, opts \\ []) do
-    ExChargebee.Interface.post("/quotes/#{quote_id}/pdf", params, opts)
-    |> Map.get("download")
-  end
 end

@@ -3,6 +3,11 @@ defmodule ExChargebee.Invoice do
   an interface for interacting with Invoices
   """
   use ExChargebee.Resource,
+    stdops: [
+      :retrieve,
+      :list,
+      :delete
+    ],
     post_operations: [
       :add_charge,
       :add_charge_item,
@@ -10,7 +15,6 @@ defmodule ExChargebee.Invoice do
       :apply_payments,
       :close,
       :collect_payment,
-      :delete,
       :delete_line_items,
       :record_payment,
       :record_tax_withheld,

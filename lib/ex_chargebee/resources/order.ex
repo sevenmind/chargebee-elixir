@@ -3,6 +3,13 @@ defmodule ExChargebee.Order do
   an interface for interacting with Orders
   """
   use ExChargebee.Resource,
+    stdops: [
+      :create,
+      :retrieve,
+      :list,
+      :update,
+      :delete
+    ],
     post_root_operations: [
       :import_order
     ],
@@ -11,7 +18,6 @@ defmodule ExChargebee.Order do
       :cancel,
       :create_refundable_credit_note,
       :reopen,
-      :delete,
       :resend
     ]
 end

@@ -6,9 +6,7 @@ defmodule ExChargebee.CouponCode do
    - List
    - Retrieve
   """
-  use ExChargebee.Resource
-
-  def archive(coupon_code, opts \\ []) do
-    post_resource(coupon_code, "/archive", %{}, opts)
-  end
+  use ExChargebee.Resource,
+    stdops: [:retrieve, :list],
+    post_operations: [:archive]
 end

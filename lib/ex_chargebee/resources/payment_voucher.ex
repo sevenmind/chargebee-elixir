@@ -1,11 +1,10 @@
-defmodule ExChargebee.PaymentIntent do
+defmodule ExChargebee.PaymentVoucher do
   @moduledoc """
-  an interface for interacting with PaymentIntents
+  an interface for interacting with PaymentVoucher
   """
   use ExChargebee.Resource,
     stdops: [
       :create,
-      :update,
       :retrieve
     ]
 end

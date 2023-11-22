@@ -2,9 +2,13 @@ defmodule ExChargebee.NonSubscription do
   @moduledoc """
   an interface for interacting with Non Subscription In App Purchases
   """
-  use ExChargebee.Resource
+  use ExChargebee.Resource,
+    stdops: false,
+    post_operations: [:one_time_purchase]
 
-  def one_time_purchase(non_subscription_app_id, params, opts \\ []) do
-    post_resource(non_subscription_app_id, "/one_time_purchase", params, opts)
+  # documentation on this endpoint is unclear
+  def non_subscriptions(params, opts \\ []) do
+    resource_base_path()
+    |> Interface.get(params, opts)
   end
 end

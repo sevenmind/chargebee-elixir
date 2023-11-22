@@ -4,13 +4,14 @@ defmodule ExChargebee.HostedPageTest do
 
   setup :verify_on_exit!
 
-  describe "checkout_new" do
+  describe "checkout_new_for_items" do
     test "correct data" do
       expect(
         ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
-          assert url == "https://test-namespace.chargebee.com/api/v2/hosted_pages/checkout_new"
+          assert url ==
+                   "https://test-namespace.chargebee.com/api/v2/hosted_pages/checkout_new_for_items"
 
           assert URI.decode(data) ==
                    "addons[id][0]=addon-a&addons[id][1]=addon-b&subscription[plan_id]=plan-a"
@@ -27,7 +28,7 @@ defmodule ExChargebee.HostedPageTest do
         end
       )
 
-      assert ExChargebee.HostedPage.checkout_new(%{
+      assert ExChargebee.HostedPage.checkout_new_for_items(%{
                subscription: %{
                  plan_id: "plan-a"
                },
@@ -39,14 +40,14 @@ defmodule ExChargebee.HostedPageTest do
     end
   end
 
-  describe "checkout_existing" do
+  describe "checkout_existing_for_items" do
     test "correct data" do
       expect(
         ExChargebee.HTTPoisonMock,
         :post!,
         fn url, data, headers ->
           assert url ==
-                   "https://test-namespace.chargebee.com/api/v2/hosted_pages/checkout_existing"
+                   "https://test-namespace.chargebee.com/api/v2/hosted_pages/checkout_existing_for_items"
 
           assert URI.decode(data) ==
                    "addons[id][0]=addon-a&addons[id][1]=addon-b&customer[id]=cus-a&subscription[id]=subscription-a&subscription[plan_id]=plan-a"
@@ -63,7 +64,7 @@ defmodule ExChargebee.HostedPageTest do
         end
       )
 
-      assert ExChargebee.HostedPage.checkout_existing(%{
+      assert ExChargebee.HostedPage.checkout_existing_for_items(%{
                subscription: %{
                  id: "subscription-a",
                  plan_id: "plan-a"

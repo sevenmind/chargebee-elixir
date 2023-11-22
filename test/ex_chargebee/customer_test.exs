@@ -6,11 +6,6 @@ defmodule ExChargebee.CustomerTest do
   setup :verify_on_exit!
 
   def subject do
-    # -d subscription_items[item_price_id][0]="basic-USD" \
-    # -d subscription_items[billing_cycles][0]=2 \
-    # -d subscription_items[quantity][0]=1 \
-    # -d subscription_items[item_price_id][1]="day-pass-USD" \
-    # -d subscription_items[unit_price][1]=100 
     ExChargebee.Customer.subscription_for_items(
       "cus_1",
       %{
@@ -70,13 +65,6 @@ defmodule ExChargebee.CustomerTest do
         fn url, _data, _headers ->
           assert url ==
                    "https://test-namespace.chargebee.com/api/v2/customers/cus_1/subscription_for_items"
-
-          # assert URI.decode(data) == "addons[id][0]=addon-a&addons[id][1]=addon-b&plan_id=plan-a"
-
-          # assert headers == [
-          #          {"Authorization", "Basic dGVzdF9jaGFyZ2VlYmVlX2FwaV9rZXk6"},
-          #          {"Content-Type", "application/x-www-form-urlencoded"}
-          #       #  ]
 
           %{
             status_code: 400,

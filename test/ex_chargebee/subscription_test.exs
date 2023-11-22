@@ -7,25 +7,44 @@ defmodule ExChargebee.SubscriptionTest do
   describe "post_operations" do
     post_operations = ExChargebee.Subscription.operations()[:post_operations]
 
-    Enum.map(post_operations, fn operation ->
-      test "#{operation}" do
-        operation = unquote(operation)
-        mock_post(operation, "sub-a")
-        assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
-      end
+    Enum.map(post_operations, fn
+      {resource, operation} ->
+        test "#{operation} #{resource}" do
+          operation = unquote(operation)
+          mock_post(operation, "sub-a", unquote(resource))
+          assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
+        end
+
+      operation ->
+        test "#{operation}" do
+          operation = unquote(operation)
+          mock_post(operation, "sub-a")
+          assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
+        end
     end)
   end
 
   describe "get_operations" do
     get_operations = ExChargebee.Subscription.operations()[:get_operations]
 
-    Enum.map(get_operations, fn operation ->
-      test "#{operation}" do
-        operation = unquote(operation)
-        mock_get(operation, "sub-a")
-        assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
+    Enum.map(
+      get_operations,
+      fn
+        {resource, operation} ->
+          test "#{operation} returns #{resource}" do
+            operation = unquote(operation)
+            mock_get(operation, "sub-a")
+            assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
+          end
+
+        operation ->
+          test "#{operation}" do
+            operation = unquote(operation)
+            mock_get(operation, "sub-a")
+            assert apply(ExChargebee.Subscription, operation, ["sub-a", %{}])
+          end
       end
-    end)
+    )
 
     test "when opts site is passed" do
       Application.put_env(:ex_chargebee, :test_site, namespace: "baz-bar", api_key: "foo")
@@ -39,7 +58,7 @@ defmodule ExChargebee.SubscriptionTest do
 
           %{
             status_code: 200,
-            body: '{"subscription": {"id": "sub-a"}}'
+            body: ~S'{"subscription": {"id": "sub-a"}}'
           }
         end
       )
@@ -48,7 +67,48 @@ defmodule ExChargebee.SubscriptionTest do
     end
   end
 
-  def mock_post(operation, id) do
+  describe "list_usages" do
+    test "returns a list of usages" do
+      expect(
+        ExChargebee.HTTPoisonMock,
+        :get!,
+        fn url, _headers ->
+          assert url ==
+                   "https://test-namespace.chargebee.com/api/v2/usages"
+
+          %{
+            status_code: 200,
+            body: ~S'{"list": [{"usage": {"id": "sub-a"}}]}'
+          }
+        end
+      )
+
+      assert ExChargebee.Usage.list() == [%{"id" => "sub-a"}]
+    end
+  end
+
+  describe "stream_list" do
+    test "returns a stream of subscriptions" do
+      expect(
+        ExChargebee.HTTPoisonMock,
+        :get!,
+        fn url, _headers ->
+          assert url ==
+                   "https://test-namespace.chargebee.com/api/v2/subscriptions"
+
+          %{
+            status_code: 200,
+            body: ~S'{"list": [{"subscription": {"id": "sub-a"}}]}'
+          }
+        end
+      )
+
+      assert ExChargebee.Subscription.stream_list()
+             |> Enum.to_list() == [%{"id" => "sub-a"}]
+    end
+  end
+
+  def mock_post(operation, id, resource \\ "subscription") do
     expect(
       ExChargebee.HTTPoisonMock,
       :post!,
@@ -59,13 +119,13 @@ defmodule ExChargebee.SubscriptionTest do
 
         %{
           status_code: 200,
-          body: '{"subscription": {"id": "sub-a"}}'
+          body: Jason.encode!(%{resource => %{id: "sub-a"}})
         }
       end
     )
   end
 
-  def mock_get(operation, id) do
+  def mock_get(operation, id, resource \\ "subscription") do
     expect(
       ExChargebee.HTTPoisonMock,
       :get!,
@@ -75,7 +135,7 @@ defmodule ExChargebee.SubscriptionTest do
 
         %{
           status_code: 200,
-          body: '{"subscription": {"id": "sub-a"}}'
+          body: Jason.encode!(%{resource => %{id: "sub-a"}})
         }
       end
     )

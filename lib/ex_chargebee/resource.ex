@@ -101,10 +101,24 @@ defmodule ExChargebee.Resource do
         "/#{@resource_plural}/#{path}"
       end
 
-      def resource_path(id, path \\ "") do
+      def resource_path(id, path \\ "")
+
+      def resource_path(id, "") do
+        encoded_id = id |> to_string |> URI.encode()
+
+        "#{resource_base_path()}/#{encoded_id}"
+      end
+
+      def resource_path(id, "/" <> _rest = path) do
         encoded_id = id |> to_string |> URI.encode()
 
         "#{resource_base_path()}/#{encoded_id}#{path}"
+      end
+
+      def resource_path(id, path) do
+        encoded_id = id |> to_string |> URI.encode()
+
+        "#{resource_base_path()}/#{encoded_id}/#{path}"
       end
 
       # expose operations for testing
@@ -116,6 +130,8 @@ defmodule ExChargebee.Resource do
           :post_root_operations,
           :stdops
         ])
+        |> Keyword.update(:list_operations, [], &Enum.map(&1, fn v -> :"list_#{v}" end))
+        |> Keyword.update(:list_root_operations, [], &Enum.map(&1, fn v -> :"list_#{v}" end))
       end
 
       unquote(define_stdops(opts, resource))
@@ -127,12 +143,14 @@ defmodule ExChargebee.Resource do
     get_operations = Keyword.get(opts, :get_operations, [])
     post_operations = Keyword.get(opts, :post_operations, [])
     list_operations = Keyword.get(opts, :list_operations, [])
+    list_root_operations = Keyword.get(opts, :list__root_operations, [])
     post_root_operations = Keyword.get(opts, :post_root_operations, [])
 
     quote location: :keep do
       unquote(generate_operations(get_operations, :get, resource))
       unquote(generate_operations(post_operations, :post, resource))
       unquote(generate_operations(list_operations, :list, resource))
+      unquote(generate_operations(list_root_operations, :list_root, resource))
       unquote(generate_operations(post_root_operations, :create, resource))
     end
   end
@@ -154,18 +172,59 @@ defmodule ExChargebee.Resource do
     end
   end
 
-  def generate_operations(operations, :list, resource) do
+  def generate_operations(operations, :list_root, resource) do
     for operation <- operations do
+      operation_name = :"list_#{operation}"
+
       quote location: :keep do
         @doc """
         Returns a list of #{@resource_plural} #{unquote(operation)}.
 
         Pagination is handled automatically.
+        For more information see [the Chargebee Documentation](https://apidocs.chargebee.com/docs/api/#{Inflex.pluralize(unquote(resource))}##{unquote(operation_name)})
         """
-        @spec unquote(operation)(map()) :: [map()] | nil
-        def unquote(operation)(params, opts \\ []) do
-          Interface.stream_list(params, "/#{unquote(operation)}", opts, unquote(resource))
-          |> Enum.to_list()
+        @spec unquote(operation_name)(map(), keyword()) :: [map()] | nil
+        def unquote(operation_name)(params \\ %{}, opts \\ []) do
+          if Keyword.get(opts, :paginate, true) do
+            unquote(operation)
+            |> resource_base_path()
+            |> Interface.stream_list(params, opts, unquote(resource))
+            |> Enum.to_list()
+          else
+            unquote(operation)
+            |> resource_base_path()
+            |> Interface.get(params, opts)
+            |> Map.update("list", [], &Map.get(&1, unquote(resource)))
+          end
+        end
+      end
+    end
+  end
+
+  def generate_operations(operations, :list, resource) do
+    for operation <- operations do
+      operation_name = :"list_#{operation}"
+
+      quote location: :keep do
+        @doc """
+        Returns a list of #{@resource_plural} #{unquote(operation)}.
+
+        Pagination is handled automatically.
+        For more information see [the Chargebee Documentation](https://apidocs.chargebee.com/docs/api/#{Inflex.pluralize(unquote(resource))}##{unquote(operation_name)})
+        """
+        @spec unquote(operation_name)(String.t(), map(), keyword()) :: [map()] | nil
+        def unquote(operation_name)(resource_id, params \\ %{}, opts \\ []) do
+          path = resource_path(resource_id, unquote(operation))
+
+          if Keyword.get(opts, :paginate, true) do
+            path
+            |> Interface.stream_list(params, opts, unquote(resource))
+            |> Enum.to_list()
+          else
+            path
+            |> Interface.get(params, opts)
+            |> Map.update("list", [], &Map.get(&1, unquote(resource)))
+          end
         end
       end
     end
@@ -179,7 +238,7 @@ defmodule ExChargebee.Resource do
 
         Find more information in [the Chargebee Documentation](https://apidocs.chargebee.com/docs/api/#{Inflex.pluralize(unquote(resource))}##{unquote(operation)})
         """
-        @spec unquote(operation)(map()) :: map() | nil
+        @spec unquote(operation)(map(), keyword()) :: map() | nil
         def unquote(operation)(params, opts \\ []) do
           unquote(operation)
           |> resource_base_path()
@@ -192,14 +251,20 @@ defmodule ExChargebee.Resource do
 
   def generate_operations(operations, verb, resource) do
     for operation <- operations do
+      {resource, operation} =
+        case operation do
+          {resource, operation} -> {resource, operation}
+          operation -> {resource, operation}
+        end
+
       quote location: :keep do
         @doc """
         Perform a #{unquote(operation)} on individual #{unquote(resource)}.
 
         Find more information in [the Chargebee Documentation](https://apidocs.chargebee.com/docs/api/#{Inflex.pluralize(unquote(resource))}##{unquote(operation)})
         """
-        @spec unquote(operation)(String.t(), map()) :: map() | nil
-        def unquote(operation)(resource_id, params, opts \\ []) do
+        @spec unquote(operation)(String.t(), map(), keyword()) :: map() | nil
+        def unquote(operation)(resource_id, params \\ %{}, opts \\ []) do
           path = resource_path(resource_id, "/#{unquote(operation)}")
 
           apply(Interface, unquote(verb), [path, params, opts])
@@ -219,7 +284,7 @@ defmodule ExChargebee.Resource do
 
       For More information see [Chargebee #{unquote(resource)} Documentation](https://apidocs.chargebee.com/docs/api/#{resource_plural})
       """
-
+      @spec retrieve(String.t(), keyword()) :: map() | nil
       def retrieve(resource_id, opts \\ []) do
         resource_path(resource_id, "")
         |> Interface.get(opts)
@@ -235,22 +300,33 @@ defmodule ExChargebee.Resource do
       resource_plural = Inflex.pluralize(unquote(resource))
 
       @doc """
-      Returns a list of #{resource_plural}.
+      Returns a list of #{resource_plural}. Pagination is handled automatically unless the opt `paginate` is set to false.
 
-      Pagination is handled automatically.
+      opts:
+        - site: the site to use for the request. Defaults to the default site.
+        - paginate: whether to paginate the results. Defaults to false. If false,
+          all results will be returned.
       """
-      def list(params \\ %{}, path \\ "", opts \\ [])
-          when is_binary(path) and is_map(params) and is_list(opts) do
-        params
-        |> stream_list(path, opts)
-        |> Enum.to_list()
+      @spec list(map(), keyword()) :: [map()] | nil
+      def list(params \\ %{}, opts \\ []) do
+        if Keyword.get(opts, :paginate, true) do
+          stream_list(params, opts)
+          |> Enum.to_list()
+        else
+          resource_base_path()
+          |> Interface.get(params, opts)
+          |> Map.update("list", [], &Map.get(&1, unquote(resource)))
+        end
       end
 
       @doc """
-      Returns a stream of #{resource_plural}. Pagination is handled automatically.
+      Returns a stream of #{resource_plural}. Pagination is handled
+      automatically as the stream is consumed.
+
       """
-      def stream_list(params \\ %{}, path \\ "", opts \\ [], resource \\ unquote(resource)) do
-        Interface.stream_list(resource_base_path(path), params, opts, resource)
+      @spec stream_list(map(), keyword()) :: Enumerable.t()
+      def stream_list(params \\ %{}, opts \\ []) do
+        Interface.stream_list(resource_base_path(), params, opts, unquote(resource))
       end
     end
   end
@@ -265,9 +341,9 @@ defmodule ExChargebee.Resource do
 
       Find more information in [the Chargebee Documentation](https://apidocs.chargebee.com/docs/api/#{resource_plural}#create_#{resource})
       """
-      def create(params, path \\ "", opts \\ []) do
-        path
-        |> resource_base_path()
+
+      def create(params, opts \\ []) do
+        resource_base_path()
         |> Interface.post(params, opts)
         |> Map.get(unquote(resource))
       end

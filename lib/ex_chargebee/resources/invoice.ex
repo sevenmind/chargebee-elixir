@@ -12,12 +12,8 @@ defmodule ExChargebee.Invoice do
       :collect_payment,
       :delete,
       :delete_line_items,
-      :pdf,
       :record_payment,
-      :record_refund,
       :record_tax_withheld,
-      :refund,
-      :remove_credit_note,
       :remove_payment,
       :remove_tax_withheld,
       :resend_einvoice,
@@ -26,9 +22,14 @@ defmodule ExChargebee.Invoice do
       :sync_usages,
       :update_details,
       :void,
-      :write_off
+      {"download", :pdf},
+      {"credit_note", :record_refund},
+      {"credit_note", :remove_credit_note},
+      {"credit_note", :refund},
+      {"credit_note", :write_off}
     ],
-    get_operations: [:download_invoice],
+    get_operations: [{"downloads", :download_einvoice}],
     post_root_operations: [:create_for_charge_items_and_charges, :import_invoice],
-    list_operations: [:payment_reference_numbers, :payments, :payment_vouchers]
+    list_root_operations: [:payment_reference_numbers],
+    list_operations: [:payments, :payment_vouchers]
 end

@@ -42,7 +42,8 @@ defmodule ExChargebee.Interface do
     |> handle_response(path, data)
   end
 
-  defp handle_response(%{body: body, status_code: 200}, _, _) do
+  defp handle_response(%{body: body, status_code: status}, _, _)
+       when status >= 200 and status < 300 do
     Jason.decode!(body)
   end
 

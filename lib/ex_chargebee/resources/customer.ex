@@ -24,7 +24,8 @@ defmodule ExChargebee.Customer do
       :update_contact,
       :update_hierarchy_settings,
       :update_payment_method,
-      :subscription_for_items
+      :subscription_for_items,
+      :import_for_items
     ],
     post_root_operations: [:move, :merge],
     list_operations: [:payment_vouchers, :contacts]

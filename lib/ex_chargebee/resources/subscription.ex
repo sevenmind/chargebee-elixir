@@ -15,7 +15,6 @@ defmodule ExChargebee.Subscription do
       :charge_future_renewals,
       :edit_advance_invoice_schedule,
       :import_contract_term,
-      :import_for_items,
       :override_billing_profile,
       :pause,
       :reactivate,
@@ -43,4 +42,7 @@ defmodule ExChargebee.Subscription do
     |> ExChargebee.Interface.post(params, opts)
     |> Map.get("unbilled_charges")
   end
+
+  defdelegate import_for_items(customer_id, params, opts), to: ExChargebee.Customer
+  defdelegate subscription_for_items(customer_id, params, opts), to: ExChargebee.Customer
 end

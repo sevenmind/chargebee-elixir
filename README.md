@@ -11,7 +11,7 @@ The package can be installed by adding `ex_chargebee` to your list of dependenci
 ```elixir
 def deps do
   [
-    {:ex_chargebee, "~> 0.4.1"}
+    {:ex_chargebee, "~> 0.4.2"}
   ]
 end
 ```

@@ -7,6 +7,7 @@ defmodule ExChargebee.Interface do
    - Chargebee namespace scoping loaded from  Application env  `:ex_chargebee, :namespace`
    - Alternative HTTP Clients configured from  Application env `:ex_chargebee, :http_client` (i.e. in testing)
   """
+  alias ExChargebee.Interface.ParameterSerializer
 
   def get(path) do
     get(path, %{})
@@ -27,7 +28,7 @@ defmodule ExChargebee.Interface do
   def post(path, data, opts \\ []) do
     body =
       data
-      |> serialize()
+      |> ParameterSerializer.serialize()
       |> URI.encode_query()
 
     fullpath = fullpath(path, opts)
@@ -102,60 +103,6 @@ defmodule ExChargebee.Interface do
         Application.get_env(:ex_chargebee, site)
     end
     |> Keyword.fetch!(path)
-  end
-
-  # serialize/3 is a 1:1 adaptation of Chargebee-Ruby `Chargebee::Util.serialize/3`
-  # from https://github.com/chargebee/chargebee-ruby/blob/42f4aa5e58d5760d9f66d3aff02f8389faa6e68f/lib/chargebee/util.rb#L5
-  def serialize(value, prefix \\ nil, index \\ nil)
-
-  def serialize(value, prefix, index) when is_map(value) do
-    Enum.flat_map(value, fn
-      {_k, nil} ->
-        []
-
-      {k, v} when k in ["metadata", :metadata] and is_map(v) ->
-        [{to_string(k), Jason.encode!(v)}]
-
-      {k, v} when is_map(v) or is_list(v) ->
-        pre = if is_nil(prefix), do: to_string(k), else: "#{prefix}[#{k}]"
-        # fix = if is_nil(index), do: "", else: "[#{index}]"
-
-        serialize(v, pre, index)
-
-      {k, v} ->
-        pre = if is_nil(prefix), do: to_string(k), else: "#{prefix}[#{k}]"
-        fix = if is_nil(index), do: "", else: "[#{index}]"
-
-        key = pre <> fix
-        [{key, to_string(v)}]
-    end)
-    |> Map.new()
-  end
-
-  def serialize(value, prefix, nil) when is_list(value) do
-    value
-    |> Enum.with_index()
-    |> Enum.flat_map(fn {item, i} -> serialize(item, prefix, i) end)
-    |> Map.new()
-  end
-
-  # Apparently Second Degree nested arrays are just encoded as json values
-  def serialize(value, prefix, index) when is_list(value) do
-    value = Jason.encode!(value)
-
-    key = "#{prefix}[#{index}]"
-
-    [{key, value}]
-  end
-
-  def serialize(_value, nil, nil) do
-    raise ArgumentError, "Only hash or arrays are allowed as value"
-  end
-
-  def serialize(value, prefix, index) do
-    key = "#{prefix}[#{index}]"
-
-    [{key, value}]
   end
 
   def stream_list(path, params, opts) do

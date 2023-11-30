@@ -14,7 +14,10 @@ defmodule ExChargebee.Interface do
   end
 
   def get(path, params, opts \\ []) do
-    params_string = URI.encode_query(params)
+    params_string =
+      params
+      |> ParameterSerializer.serialize()
+      |> URI.encode_query()
 
     url =
       [fullpath(path, opts), params_string]

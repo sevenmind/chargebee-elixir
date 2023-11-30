@@ -1,4 +1,10 @@
 defmodule ExChargebee.Interface.ParameterSerializer do
+  @moduledoc """
+  A custom serializer for Chargebee API get and post parameters
+  
+  Behavior resembles x-www-form-urlencoded at first glance, but diverges sharply
+  in handling of nested arrays and maps.
+  """
   # serialize/3 is a 1:1 adaptation of Chargebee-Ruby `Chargebee::Util.serialize/3`
   # from https://github.com/chargebee/chargebee-ruby/blob/42f4aa5e58d5760d9f66d3aff02f8389faa6e68f/lib/chargebee/util.rb#L5
   def serialize(value, prefix \\ nil, index \\ nil)

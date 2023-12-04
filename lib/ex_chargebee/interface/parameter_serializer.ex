@@ -1,7 +1,7 @@
 defmodule ExChargebee.Interface.ParameterSerializer do
   @moduledoc """
   A custom serializer for Chargebee API get and post parameters
-  
+
   Behavior resembles x-www-form-urlencoded at first glance, but diverges sharply
   in handling of nested arrays and maps.
   """

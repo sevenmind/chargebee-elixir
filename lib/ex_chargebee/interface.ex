@@ -51,25 +51,29 @@ defmodule ExChargebee.Interface do
     Jason.decode!(body)
   end
 
-  defp handle_response(%{body: body, status_code: 400}, path, data) do
+  defp handle_response(%{body: body, status_code: 400} = response, path, data) do
     message =
       body
       |> Jason.decode!()
       |> Map.get("message")
 
-    raise ExChargebee.InvalidRequestError, message: message, path: path, data: data
+    raise ExChargebee.InvalidRequestError,
+      message: message,
+      path: path,
+      data: data,
+      response: response
   end
 
-  defp handle_response(%{status_code: 401}, path, data) do
-    raise ExChargebee.UnauthorizedError, path: path, data: data
+  defp handle_response(%{status_code: 401} = response, path, data) do
+    raise ExChargebee.UnauthorizedError, path: path, data: data, response: response
   end
 
-  defp handle_response(%{status_code: 404}, path, data) do
-    raise ExChargebee.NotFoundError, path: path, data: data
+  defp handle_response(%{status_code: 404} = response, path, data) do
+    raise ExChargebee.NotFoundError, path: path, data: data, response: response
   end
 
-  defp handle_response(%{status_code: 429}, path, data) do
-    raise ExChargebee.RateLimitError, path: path, data: data
+  defp handle_response(%{status_code: 429} = response, path, data) do
+    raise ExChargebee.RateLimitError, path: path, data: data, response: response
   end
 
   defp handle_response(%{} = response, path, data) do
